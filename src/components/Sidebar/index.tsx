@@ -15,6 +15,7 @@ import {
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import React from "react";
+import { cn } from "@/lib/utils";
 
 interface SidebarLinkProps {
     href: string;
@@ -65,11 +66,10 @@ const Sidebar = () => {
         dispatch(setIsSidebarCollapsed(!isSidebarCollapsed));
     };
 
-    const sidebarClassNames = `fixed flex flex-col ${isSidebarCollapsed ? "w-0 md:w-16" : "w-72 md:w-64"
-        } transition-all duration-300 overflow-hidden h-full shadow-md z-40`;
-
     return (
-        <div className={sidebarClassNames}>
+        <div className={cn(
+            "fixed flex flex-col transition-all duration-300 overflow-hidden h-full shadow-md z-40 bg-sidebar text-sidebar-foreground",
+            isSidebarCollapsed ? "w-0 md:w-16" : "w-72 md:w-64")}>
             {/* TOP LOGO */}
             <div
                 className={`flex gap-3 justify-between md:justify-normal items-center pt-8 ${isSidebarCollapsed ? "px-5" : "px-8"
