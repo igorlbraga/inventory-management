@@ -1,37 +1,67 @@
-import { combineReducers, configureStore } from "@reduxjs/toolkit"
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import { useRef } from "react";
+import { combineReducers, configureStore } from "@reduxjs/toolkit";
+import globalReducer from "./features/global/globalSlice";
+import { api } from "./api";
 
-import { persistReducer } from "redux-persist"
-import persistStore from "redux-persist/es/persistStore"
-import globalReducer from "./features/global/globalSlice"
+import {
+    persistStore,
+    persistReducer,
+} from "redux-persist";
+import { PersistGate } from "redux-persist/integration/react";
+import createWebStorage from "redux-persist/lib/storage/createWebStorage";
+import { setupListeners } from "@reduxjs/toolkit/query";
 
-import storage from "redux-persist/lib/storage"
+/* REDUX PERSISTENCE */
+
+const createNoopStorage = () => {
+    return {
+        getItem(_key: any) {
+            return Promise.resolve(null);
+        },
+        setItem(_key: any, value: any) {
+            return Promise.resolve(value);
+        },
+        removeItem(_key: any) {
+            return Promise.resolve();
+        },
+    };
+};
+
+const storage =
+    typeof window === "undefined"
+        ? createNoopStorage()
+        : createWebStorage("local");
 
 const persistConfig = {
     key: "root",
     storage,
-    whitelist: ["global"]
-}
-
+    whitelist: ["global"],
+};
 const rootReducer = combineReducers({
     global: globalReducer,
-})
+    [api.reducerPath]: api.reducer,
+});
+const persistedReducer = persistReducer(persistConfig, rootReducer);
 
+/* REDUX STORE */
 export const makePersistentStore = () => {
     const store = configureStore({
-        reducer: persistReducer(persistConfig, rootReducer),
+        reducer: persistedReducer,
         middleware: (getDefaultMiddleware) =>
             getDefaultMiddleware({
-                serializableCheck: false
-            })
-    })
-
+                serializableCheck: false,
+            }).concat(api.middleware),
+    });
     return {
         store,
         persistor: persistStore(store)
     }
-}
+};
 
-export type AppPersistentStoreRef = ReturnType<typeof makePersistentStore>
+/* REDUX TYPES */
+export type AppPersistentStoreRef = ReturnType<typeof makePersistentStore>;
 export type AppStore = AppPersistentStoreRef["store"]
-export type RootState = ReturnType<AppStore["getState"]>
-export type AppDispatch = AppStore["dispatch"]
+export type RootState = ReturnType<AppStore["getState"]>;
+export type AppDispatch = AppStore["dispatch"];

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import DashboardWrapper from "./dashboardWrapper";
 import StoreProvider from "./StoreProvider";
+import ThemeProvider from "./ThemeProvider";
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -14,14 +15,21 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body      >
+    <html lang="en" suppressHydrationWarning>
+      <body>
         <StoreProvider>
-          <DashboardWrapper>
-            {children}
-          </DashboardWrapper>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <DashboardWrapper>
+              {children}
+            </DashboardWrapper>
+          </ThemeProvider>
         </StoreProvider>
       </body>
-    </html>
+    </html >
   );
 }
